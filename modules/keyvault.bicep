@@ -1,6 +1,7 @@
 
 param name string
 param location string
+param encryptionKeyName string
 
 resource kvResource 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: name
@@ -20,6 +21,21 @@ resource kvResource 'Microsoft.KeyVault/vaults@2019-09-01' = {
     enableRbacAuthorization: false
     accessPolicies: [
     ]
+  }
+}
+
+resource kvDiskEncryptionKeyResource 'Microsoft.KeyVault/vaults/keys@2019-09-01' = {
+  name: encryptionKeyName
+  parent: kvResource
+  properties:{
+    curveName: null
+    keySize: 2048
+    kty: 'RSA'
+      attributes: {
+          enabled: true
+          exp: null
+          nbf: null
+      }
   }
 }
 
