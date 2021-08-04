@@ -1,6 +1,6 @@
 
-param name string = 'corpnet_access_vnet'
-param location string = 'eastus'
+param name string
+param location string
 
 resource corpnet_vnetResource 'Microsoft.Network/virtualNetworks@2020-11-01' = {
   name: name

@@ -5,7 +5,6 @@ param subnet string
 param adminPassword string
 
 var nicName = '${name}-nic'
-//var disk1Name = '${name}_OsDisk_1${toLower(uniqueString(resourceGroup().id))}'
 var disk1Name = '${name}_OsDisk'
 
 resource networkInterfacesResource 'Microsoft.Network/networkInterfaces@2020-11-01' = {

@@ -1,6 +1,6 @@
 
-param name string = 'kv-${toLower(uniqueString(utcNow()))}'
-param location string = 'eastus'
+param name string
+param location string
 
 resource kvResource 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: name

@@ -1,6 +1,6 @@
 targetScope='resourceGroup'
 
-module vnetModule 'vnet.bicep' = {
+module vnetModule '../modules/vnet.bicep' = {
   name: 'vnet-test'
   params: {
     name: 'vnet-test'
