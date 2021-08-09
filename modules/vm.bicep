@@ -15,7 +15,6 @@ resource networkInterfacesResource 'Microsoft.Network/networkInterfaces@2020-11-
       {
         name: 'ipconfig1'
         properties: {
-          //privateIPAddress: '10.10.1.4'
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
             id: subnet

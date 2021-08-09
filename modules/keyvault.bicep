@@ -1,7 +1,7 @@
 
 param name string
 param location string
-param encryptionKeyName string
+param enableSoftDelete bool = true
 
 resource kvResource 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: name
@@ -15,27 +15,11 @@ resource kvResource 'Microsoft.KeyVault/vaults@2019-09-01' = {
     enabledForDeployment: false
     enabledForTemplateDeployment: true
     enabledForDiskEncryption: true
-    enableSoftDelete: true
+    enableSoftDelete: enableSoftDelete
     softDeleteRetentionInDays: 90
-    enablePurgeProtection: true
     enableRbacAuthorization: false
     accessPolicies: [
     ]
-  }
-}
-
-resource kvDiskEncryptionKeyResource 'Microsoft.KeyVault/vaults/keys@2019-09-01' = {
-  name: encryptionKeyName
-  parent: kvResource
-  properties:{
-    curveName: null
-    keySize: 2048
-    kty: 'RSA'
-      attributes: {
-          enabled: true
-          exp: null
-          nbf: null
-      }
   }
 }
 

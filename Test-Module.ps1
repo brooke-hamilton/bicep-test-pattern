@@ -73,7 +73,7 @@ function Deploy ([bool]$async, [string]$testFile, [string]$currentDeploymentName
     Log "Using deployment name $currentDeploymentName"
     Log "Running tests in $testFile"
     
-    $command = "az deployment group create --template-file $testFile --resource-group $resourceGroupName --mode $Mode --name $currentDeploymentName --no-prompt --verbose --no-wait"
+    $command = "az deployment group create --template-file $testFile --resource-group $resourceGroupName --mode $Mode --name $currentDeploymentName --no-prompt --verbose"
     Invoke-Expression -Command $command
 }
 

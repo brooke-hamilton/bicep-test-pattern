@@ -3,11 +3,11 @@ targetScope = 'resourceGroup'
 
 @secure()
 param vm_admin_password string
-
-var vnet_name = 'corpnet_access_vnet'
-var kv_name = 'corpnet-${toLower(uniqueString(resourceGroup().id))}'
-var bastion_name = 'corpnet-bastion'
-var vm_name = 'corpnetvm'
+param vnet_name string = 'corpnet_access_vnet'
+param kv_name string = 'corpnet-keyvanlt'
+param disk_encryption_keyname string = 'diskencryptionkey'
+param bastion_name string = 'corpnet-bastion'
+param vm_name string = 'corpnetvm'
 
 module vnetModule 'modules/vnet.bicep' = {
   name: 'vnetDeploy'
@@ -22,6 +22,17 @@ module kvModule 'modules/keyvault.bicep' = {
   params: {
     name: kv_name
     location: resourceGroup().location
+  }
+}
+
+module diskEncryptionKeyModule 'modules/diskEncryptionKey.bicep' = {
+  name: 'diskEncryptionKeyDeploy'
+  dependsOn: [
+    kvModule
+  ]
+  params: {
+    keyVaultName: kv_name
+    diskEncryptionKeyName: disk_encryption_keyname
   }
 }
 
