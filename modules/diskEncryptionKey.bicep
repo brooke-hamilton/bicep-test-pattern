@@ -1,4 +1,3 @@
-
 param keyVaultName string
 param diskEncryptionKeyName string
 

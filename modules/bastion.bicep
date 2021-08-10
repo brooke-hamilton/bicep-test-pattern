@@ -1,8 +1,6 @@
-
 param name string
 param subnetId string
-
-var pipName = 'bastion-public-ip'
+param pipName string = 'bastion-public-ip'
 
 resource publicIpResource 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
   name: pipName

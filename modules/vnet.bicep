@@ -1,8 +1,7 @@
-
 param name string
 param location string
 
-resource corpnet_vnetResource 'Microsoft.Network/virtualNetworks@2020-11-01' = {
+resource vnetResource 'Microsoft.Network/virtualNetworks@2020-11-01' = {
   name: name
   location: location
   properties: {
@@ -16,7 +15,7 @@ resource corpnet_vnetResource 'Microsoft.Network/virtualNetworks@2020-11-01' = {
 
 resource bastion_subnetResource 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' = {
   name: 'AzureBastionSubnet'
-  parent: corpnet_vnetResource
+  parent: vnetResource
   properties: {
     addressPrefix: '10.10.0.0/27'
     privateEndpointNetworkPolicies: 'Enabled'
@@ -26,7 +25,7 @@ resource bastion_subnetResource 'Microsoft.Network/virtualNetworks/subnets@2021-
 
 resource vm_subnetResource 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' = {
   name: 'VM_Subnet_1'
-  parent: corpnet_vnetResource
+  parent: vnetResource
   dependsOn: [
     bastion_subnetResource
   ]
@@ -37,7 +36,7 @@ resource vm_subnetResource 'Microsoft.Network/virtualNetworks/subnets@2021-02-01
   }
 }
 
-output vnet_Id string = corpnet_vnetResource.id
-output vnet_name string = corpnet_vnetResource.name
+output vnet_Id string = vnetResource.id
+output vnet_name string = vnetResource.name
 output bastion_subnet_id string = bastion_subnetResource.id
 output vm_subnet_id string = vm_subnetResource.id

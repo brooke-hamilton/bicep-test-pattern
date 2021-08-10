@@ -1,6 +1,5 @@
-
 param name string
-param subnet string
+param subnetId string
 @secure()
 param adminPassword string
 
@@ -17,7 +16,7 @@ resource networkInterfacesResource 'Microsoft.Network/networkInterfaces@2020-11-
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: subnet
+            id: subnetId
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
