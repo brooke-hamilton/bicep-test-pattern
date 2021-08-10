@@ -1,4 +1,4 @@
-# Bicep Test Pattern
+# Bicep Module Test Pattern
 
 This is an example of how [Bicep](https://aka.ms/bicep) modules can be unit tested. The pattern is similar to unit testing of code. A test is written as Bicep files that consumes the module being tested. A simple test runner executes the Bicep test. The test runner can be included with the tests and designed to meet the needs of the development team.
 
