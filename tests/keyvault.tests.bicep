@@ -1,4 +1,3 @@
-
 var name = 'bastion-test-vault'
 
 module kvModule '../modules/keyvault.bicep' = {

@@ -1,4 +1,3 @@
-
 var keyVaultName = 'testkv-encryptionkey'
 var diskEncryptionKeyName = 'testkey'
 
