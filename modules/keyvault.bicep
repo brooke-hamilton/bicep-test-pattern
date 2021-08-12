@@ -12,7 +12,7 @@ resource kvResource 'Microsoft.KeyVault/vaults@2019-09-01' = {
     }
     tenantId: subscription().tenantId
     enabledForDeployment: false
-    enabledForTemplateDeployment: true
+    enabledForTemplateDeployment: false
     enabledForDiskEncryption: true
     enableSoftDelete: enableSoftDelete
     softDeleteRetentionInDays: 90

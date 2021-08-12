@@ -26,11 +26,8 @@ module kvModule 'modules/keyvault.bicep' = {
 
 module diskEncryptionKeyModule 'modules/diskEncryptionKey.bicep' = {
   name: 'diskEncryptionKeyDeploy'
-  dependsOn: [
-    kvModule
-  ]
   params: {
-    keyVaultName: kv_name
+    keyVaultName: kvModule.outputs.keyvault_name
     diskEncryptionKeyName: disk_encryption_keyname
   }
 }
@@ -49,6 +46,15 @@ module vmModule 'modules/vm.bicep' = {
     name: vm_name
     subnetId: vnetModule.outputs.vm_subnet_id
     adminPassword: vm_admin_password
+  }
+}
+
+module diskEncryptionVMExtensionModule 'modules/diskEncryptionVMExtension.bicep' = {
+  name: 'diskEncryptionVMExtensionDeployment'
+  params: {
+    vmName: vmModule.outputs.vm_name
+    keyVaultName: kvModule.outputs.keyvault_name
+    encryptionKeyName: diskEncryptionKeyModule.outputs.disk_encryption_key_name
   }
 }
 

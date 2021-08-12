@@ -121,7 +121,7 @@ function Deploy ([bool]$async, [string]$testFile, [string]$currentDeploymentName
         Log "Running tests and waiting for results in $testFile"
     }
 
-    $azArgs = "deployment", "group", "create", "--verbose", "--template-file", $testFile, "--resource-group", $resourceGroupName, "--mode", $Mode, "--name", $currentDeploymentName
+    $azArgs = "deployment", "group", "create", "--template-file", $testFile, "--resource-group", $resourceGroupName, "--mode", $Mode, "--name", $currentDeploymentName
     if ($async) {
         $azArgs += '--no-wait'
     }

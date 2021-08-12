@@ -1,4 +1,4 @@
-var keyVaultName = 'testkv-encryptionkey'
+var keyVaultName = 'testkv-encryptionkey7'
 var diskEncryptionKeyName = 'testkey'
 
 module keyVaultModule '../modules/keyvault.bicep' = {
@@ -6,17 +6,14 @@ module keyVaultModule '../modules/keyvault.bicep' = {
   params:{
     name: keyVaultName
     location: resourceGroup().location
-    
+    enableSoftDelete: false
   }
 }
 
 module diskEncryptionKeyModule '../modules/diskEncryptionKey.bicep' = {
   name: 'diskEncryptionKeyDeployment'
-  dependsOn: [
-    keyVaultModule
-  ]
   params: {
-    keyVaultName: keyVaultName
+    keyVaultName: keyVaultModule.outputs.keyvault_name
     diskEncryptionKeyName: diskEncryptionKeyName
   }
 }

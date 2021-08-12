@@ -14,3 +14,5 @@ resource kvDiskEncryptionKeyResource 'Microsoft.KeyVault/vaults/keys@2019-09-01'
       }
   }
 }
+
+output disk_encryption_key_name string = kvDiskEncryptionKeyResource.name
