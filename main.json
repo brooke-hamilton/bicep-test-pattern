@@ -1,0 +1,619 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.613.9944",
+      "templateHash": "17519508943751556149"
+    }
+  },
+  "parameters": {
+    "vm_admin_password": {
+      "type": "secureString"
+    },
+    "vnet_name": {
+      "type": "string",
+      "defaultValue": "bastion_vm_vnet"
+    },
+    "kv_name": {
+      "type": "string",
+      "defaultValue": "[format('vm-secrets-{0}', toLower(uniqueString(resourceGroup().id)))]"
+    },
+    "disk_encryption_keyname": {
+      "type": "string",
+      "defaultValue": "diskencryptionkey"
+    },
+    "bastion_name": {
+      "type": "string",
+      "defaultValue": "bastion-remote-access"
+    },
+    "vm_name": {
+      "type": "string",
+      "defaultValue": "vm-jumpbox"
+    }
+  },
+  "functions": [],
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "vnetDeploy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('vnet_name')]"
+          },
+          "location": {
+            "value": "[resourceGroup().location]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.613.9944",
+              "templateHash": "8941159764288947055"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            }
+          },
+          "functions": [],
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2020-11-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "addressSpace": {
+                  "addressPrefixes": [
+                    "10.10.0.0/16"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Network/virtualNetworks/subnets",
+              "apiVersion": "2021-02-01",
+              "name": "[format('{0}/{1}', parameters('name'), 'AzureBastionSubnet')]",
+              "properties": {
+                "addressPrefix": "10.10.0.0/27",
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/virtualNetworks/subnets",
+              "apiVersion": "2021-02-01",
+              "name": "[format('{0}/{1}', parameters('name'), 'VM_Subnet_1')]",
+              "properties": {
+                "addressPrefix": "10.10.1.0/24",
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('name'), 'AzureBastionSubnet')]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "vnet_Id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('name'))]"
+            },
+            "vnet_name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "bastion_subnet_id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('name'), 'AzureBastionSubnet')]"
+            },
+            "vm_subnet_id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('name'), 'VM_Subnet_1')]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "kvDeploy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('kv_name')]"
+          },
+          "location": {
+            "value": "[resourceGroup().location]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.613.9944",
+              "templateHash": "11451758139881862818"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "enableSoftDelete": {
+              "type": "bool",
+              "defaultValue": true
+            }
+          },
+          "functions": [],
+          "resources": [
+            {
+              "type": "Microsoft.KeyVault/vaults",
+              "apiVersion": "2019-09-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "sku": {
+                  "family": "A",
+                  "name": "standard"
+                },
+                "tenantId": "[subscription().tenantId]",
+                "enabledForDeployment": false,
+                "enabledForTemplateDeployment": false,
+                "enabledForDiskEncryption": true,
+                "enableSoftDelete": "[parameters('enableSoftDelete')]",
+                "softDeleteRetentionInDays": 90,
+                "enableRbacAuthorization": false,
+                "accessPolicies": []
+              }
+            }
+          ],
+          "outputs": {
+            "keyvault_name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "keyvault_uri": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.KeyVault/vaults', parameters('name'))).vaultUri]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "diskEncryptionKeyDeploy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "keyVaultName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'kvDeploy'), '2019-10-01').outputs.keyvault_name.value]"
+          },
+          "diskEncryptionKeyName": {
+            "value": "[parameters('disk_encryption_keyname')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.613.9944",
+              "templateHash": "7116061044000585736"
+            }
+          },
+          "parameters": {
+            "keyVaultName": {
+              "type": "string"
+            },
+            "diskEncryptionKeyName": {
+              "type": "string"
+            }
+          },
+          "functions": [],
+          "resources": [
+            {
+              "type": "Microsoft.KeyVault/vaults/keys",
+              "apiVersion": "2019-09-01",
+              "name": "[format('{0}/{1}', parameters('keyVaultName'), parameters('diskEncryptionKeyName'))]",
+              "properties": {
+                "curveName": null,
+                "keySize": 2048,
+                "kty": "RSA",
+                "attributes": {
+                  "enabled": true,
+                  "exp": null,
+                  "nbf": null
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "disk_encryption_key_name": {
+              "type": "string",
+              "value": "[format('{0}/{1}', parameters('keyVaultName'), parameters('diskEncryptionKeyName'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'kvDeploy')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "bastionDeploy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('bastion_name')]"
+          },
+          "subnetId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnetDeploy'), '2019-10-01').outputs.bastion_subnet_id.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.613.9944",
+              "templateHash": "13473104468506714344"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "subnetId": {
+              "type": "string"
+            },
+            "pipName": {
+              "type": "string",
+              "defaultValue": "bastion-public-ip"
+            }
+          },
+          "functions": [],
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2021-02-01",
+              "name": "[parameters('pipName')]",
+              "location": "[resourceGroup().location]",
+              "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static"
+              }
+            },
+            {
+              "type": "Microsoft.Network/bastionHosts",
+              "apiVersion": "2021-02-01",
+              "name": "[parameters('name')]",
+              "location": "[resourceGroup().location]",
+              "sku": {
+                "name": "Basic"
+              },
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "IpConf",
+                    "properties": {
+                      "subnet": {
+                        "id": "[parameters('subnetId')]"
+                      },
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('pipName'))]"
+                      }
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('pipName'))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnetDeploy')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "vmDeploy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('vm_name')]"
+          },
+          "subnetId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnetDeploy'), '2019-10-01').outputs.vm_subnet_id.value]"
+          },
+          "adminPassword": {
+            "value": "[parameters('vm_admin_password')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.613.9944",
+              "templateHash": "7263583529590125690"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "subnetId": {
+              "type": "string"
+            },
+            "adminPassword": {
+              "type": "secureString"
+            }
+          },
+          "functions": [],
+          "variables": {
+            "nicName": "[format('{0}-nic', parameters('name'))]",
+            "disk1Name": "[format('{0}_OsDisk', parameters('name'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2020-11-01",
+              "name": "[variables('nicName')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "subnet": {
+                        "id": "[parameters('subnetId')]"
+                      },
+                      "primary": true,
+                      "privateIPAddressVersion": "IPv4"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2021-03-01",
+              "name": "[parameters('name')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "diagnosticsProfile": {
+                  "bootDiagnostics": {
+                    "enabled": false
+                  }
+                },
+                "hardwareProfile": {
+                  "vmSize": "Standard_D4s_v3"
+                },
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "MicrosoftWindowsDesktop",
+                    "offer": "Windows-10",
+                    "sku": "21h1-pro",
+                    "version": "latest"
+                  },
+                  "osDisk": {
+                    "osType": "Windows",
+                    "name": "[variables('disk1Name')]",
+                    "createOption": "FromImage",
+                    "caching": "ReadWrite",
+                    "managedDisk": {
+                      "storageAccountType": "Premium_LRS"
+                    },
+                    "diskSizeGB": 127
+                  },
+                  "dataDisks": []
+                },
+                "osProfile": {
+                  "computerName": "[parameters('name')]",
+                  "adminUsername": "brooke",
+                  "adminPassword": "[parameters('adminPassword')]",
+                  "windowsConfiguration": {
+                    "provisionVMAgent": true,
+                    "enableAutomaticUpdates": true,
+                    "patchSettings": {
+                      "patchMode": "AutomaticByOS",
+                      "assessmentMode": "ImageDefault",
+                      "enableHotpatching": false
+                    }
+                  },
+                  "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "vm_name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'vnetDeploy')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "diskEncryptionVMExtensionDeployment",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "vmName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vmDeploy'), '2019-10-01').outputs.vm_name.value]"
+          },
+          "keyVaultName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'kvDeploy'), '2019-10-01').outputs.keyvault_name.value]"
+          },
+          "encryptionKeyName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'diskEncryptionKeyDeploy'), '2019-10-01').outputs.disk_encryption_key_name.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.613.9944",
+              "templateHash": "4897635992334700036"
+            }
+          },
+          "parameters": {
+            "vmName": {
+              "type": "string"
+            },
+            "keyVaultName": {
+              "type": "string"
+            },
+            "encryptionKeyName": {
+              "type": "string"
+            }
+          },
+          "functions": [],
+          "variables": {
+            "extensionName": "AzureDiskEncryption",
+            "extensionVersion": "2.2",
+            "encryptionOperation": "EnableEncryption",
+            "keyEncryptionAlgorithm": "RSA-OAEP"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2021-04-01",
+              "name": "[format('{0}/{1}', parameters('vmName'), variables('extensionName'))]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "publisher": "Microsoft.Azure.Security",
+                "type": "[variables('extensionName')]",
+                "typeHandlerVersion": "[variables('extensionVersion')]",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "EncryptionOperation": "[variables('encryptionOperation')]",
+                  "KeyVaultURL": "[reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2019-09-01').vaultUri]",
+                  "KeyVaultResourceId": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
+                  "KeyEncryptionKeyURL": "[reference(resourceId('Microsoft.KeyVault/vaults/keys', split(parameters('encryptionKeyName'), '/')[0], split(parameters('encryptionKeyName'), '/')[1]), '2019-09-01').keyUriWithVersion]",
+                  "KekVaultResourceId": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
+                  "KeyEncryptionAlgorithm": "[variables('keyEncryptionAlgorithm')]",
+                  "VolumeType": "All",
+                  "ResizeOSDisk": false
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "keyvault_resource_id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            },
+            "keyvault_key_resource_id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.KeyVault/vaults/keys', split(parameters('encryptionKeyName'), '/')[0], split(parameters('encryptionKeyName'), '/')[1])]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'diskEncryptionKeyDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'kvDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'vmDeploy')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "resource_group_name": {
+      "type": "string",
+      "value": "[resourceGroup().name]"
+    },
+    "vnet_id": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnetDeploy'), '2019-10-01').outputs.vnet_Id.value]"
+    },
+    "vnet_name": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnetDeploy'), '2019-10-01').outputs.vnet_name.value]"
+    },
+    "keyvault_name": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'kvDeploy'), '2019-10-01').outputs.keyvault_name.value]"
+    },
+    "keyvault_uri": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'kvDeploy'), '2019-10-01').outputs.keyvault_uri.value]"
+    }
+  }
+}
