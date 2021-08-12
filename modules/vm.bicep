@@ -1,5 +1,6 @@
 param name string
 param subnetId string
+param adminUserName string
 @secure()
 param adminPassword string
 
@@ -59,7 +60,7 @@ resource vmResource 'Microsoft.Compute/virtualMachines@2021-03-01' = {
     }
     osProfile: {
       computerName: name
-      adminUsername: 'brooke'
+      adminUsername: adminUserName
       adminPassword: adminPassword
       windowsConfiguration: {
         provisionVMAgent: true

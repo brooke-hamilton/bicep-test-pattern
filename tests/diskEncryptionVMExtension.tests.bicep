@@ -18,6 +18,7 @@ module vmModule '../modules/vm.bicep' = {
   params:{
     name: vmName
     subnetId: vmVnet.outputs.vm_subnet_id
+    adminUserName: 'azureuser'
     adminPassword: windowsAdminPassword
   }
 }

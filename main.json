@@ -5,10 +5,13 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.613.9944",
-      "templateHash": "17519508943751556149"
+      "templateHash": "3927771037191051753"
     }
   },
   "parameters": {
+    "admin_user_name": {
+      "type": "string"
+    },
     "vm_admin_password": {
       "type": "secureString"
     },
@@ -378,6 +381,9 @@
           "subnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'vnetDeploy'), '2019-10-01').outputs.vm_subnet_id.value]"
           },
+          "adminUserName": {
+            "value": "[parameters('admin_user_name')]"
+          },
           "adminPassword": {
             "value": "[parameters('vm_admin_password')]"
           }
@@ -389,7 +395,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.613.9944",
-              "templateHash": "7263583529590125690"
+              "templateHash": "10472027817756175179"
             }
           },
           "parameters": {
@@ -397,6 +403,9 @@
               "type": "string"
             },
             "subnetId": {
+              "type": "string"
+            },
+            "adminUserName": {
               "type": "string"
             },
             "adminPassword": {
@@ -465,7 +474,7 @@
                 },
                 "osProfile": {
                   "computerName": "[parameters('name')]",
-                  "adminUsername": "brooke",
+                  "adminUsername": "[parameters('adminUserName')]",
                   "adminPassword": "[parameters('adminPassword')]",
                   "windowsConfiguration": {
                     "provisionVMAgent": true,

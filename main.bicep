@@ -1,5 +1,6 @@
 targetScope = 'resourceGroup'
 
+param admin_user_name string
 @secure()
 param vm_admin_password string
 param vnet_name string = 'bastion_vm_vnet'
@@ -45,6 +46,7 @@ module vmModule 'modules/vm.bicep' = {
   params: {
     name: vm_name
     subnetId: vnetModule.outputs.vm_subnet_id
+    adminUserName: admin_user_name
     adminPassword: vm_admin_password
   }
 }
