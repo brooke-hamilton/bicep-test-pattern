@@ -6,7 +6,7 @@ This is an example of how [Bicep](https://aka.ms/bicep) modules can be unit test
 
 The `main.bicep` file will deploy all the modules in the `modules` folder. The sample as a whole deploys a single VM with a Bastion host, connected to a vnet, with a KeyVault for storing the disk encryption key. Deploying the whole solution is not necessary for understanding or running the tests.
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbrooke-hamilton%2Fbicep-test-pattern%2Fmain%2Fmain.bicep)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbrooke-hamilton%2Fbicep-test-pattern%2Fmain%2Fmain.json)
 
 ## Module Design
 
